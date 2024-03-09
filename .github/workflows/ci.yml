@@ -30,11 +30,15 @@ jobs:
         run: |
           import json
           import os
+          from pathlib import Path
 
 
           def discover() -> list[str]:
               for changed in ${{ steps.files-changed.outputs.files_modified }}:
-                  yield changed
+                  if ".github" in changed:
+                      continue
+                  path = Path(changed)
+                  yield path.parts[0]
 
 
           def jsonify(item_lists: list[str]) -> str:
@@ -42,7 +46,7 @@ jobs:
 
 
           def main():
-              item_lists = list(discover())
+              item_lists = list(set(discover()))
               json_modules = jsonify({"directory": item_lists})
 
               github_output = f"matrix={json_modules}"
