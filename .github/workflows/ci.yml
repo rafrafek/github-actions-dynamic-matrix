@@ -65,7 +65,7 @@ jobs:
   build:
     needs: prepare
     runs-on: ubuntu-latest
-    if: ${{ fromJson(needs.prepare.outputs.matrix).service != '[]'}}
+    if: ${{ fromJson(needs.prepare.outputs.matrix).service != [] }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
