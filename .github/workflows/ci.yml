@@ -27,7 +27,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          echo "matrix=${{ steps.files-changed.outputs.files_modified }}" >> $GITHUB_OUTPUT
+          echo "matrix=${{ fromJson(steps.files-changed.outputs.files_modified) }}" >> $GITHUB_OUTPUT
 
   build:
     needs: prepare
