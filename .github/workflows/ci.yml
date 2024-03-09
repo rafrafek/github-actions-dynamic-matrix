@@ -32,7 +32,7 @@ jobs:
           import os
 
 
-          def discovery() -> list[str]:
+          def discover() -> list[str]:
               for changed in ${{ steps.files-changed.outputs.files_modified }}:
                   yield changed
 
