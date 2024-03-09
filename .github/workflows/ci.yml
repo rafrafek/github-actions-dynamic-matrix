@@ -61,7 +61,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Debug
-        run: echo ${{ matrix }}
+        run: echo ${{ matrix.directory }}
   #   strategy:
   #     fail-fast: false
   #     matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
