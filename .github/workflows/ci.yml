@@ -38,7 +38,8 @@ jobs:
                   if ".github" in changed:
                       continue
                   path = Path(changed)
-                  yield path.parts[0]
+                  if Path(path.parts[0]).is_dir():
+                    yield path.parts[0]
 
 
           def jsonify(item_lists: list[str]) -> str:
@@ -80,7 +81,7 @@ jobs:
         name: Docker metadata
         uses: docker/metadata-action@v5
         with:
-          images: ${{ github.event.repository.name }}/${{ matrix.service }}
+          images: ghcr.io/${{ github.event.repository.name }}/${{ matrix.service }}
       - id: build-push
         name: Build and push
         uses: docker/build-push-action@v3
