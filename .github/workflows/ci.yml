@@ -19,6 +19,8 @@ jobs:
     outputs:
       matrix: ${{ steps.prepare.outputs.matrix }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Fetch changed files
         uses: trilom/file-changes-action@v1
         id: files-changed
@@ -39,7 +41,7 @@ jobs:
                       continue
                   path = Path(changed)
                   if Path(path.parts[0]).is_dir():
-                    yield path.parts[0]
+                      yield path.parts[0]
 
 
           def jsonify(item_lists: list[str]) -> str:
