@@ -32,9 +32,12 @@ jobs:
   build:
     needs: prepare
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Debug
-        run: echo ${{ needs.prepare.outputs.matrix }}
+        run: echo ${{ matrix }}
   #   strategy:
   #     fail-fast: false
   #     matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
