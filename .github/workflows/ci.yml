@@ -26,8 +26,29 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare
         id: prepare
+        shell: python
         run: |
-          echo 'matrix=${{ toJson({"directory": steps.files-changed.outputs.files_modified}) }}' >> $GITHUB_OUTPUT
+          import json
+          import os
+
+
+          def discovery() -> list[str]:
+              for changed in ${{ steps.files-changed.outputs.files_modified }}:
+                  yield changed
+
+
+          def jsonify(item_lists: list[str]) -> str:
+              return json.dumps(item_lists, separators=(",", ":"))
+
+
+          def main():
+              item_lists = list(discover())
+              json_modules = jsonify({"directory": item_lists})
+
+              github_output = f"matrix={json_modules}"
+
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write(github_output)
 
   build:
     needs: prepare
