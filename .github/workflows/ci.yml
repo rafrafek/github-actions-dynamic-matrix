@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.prepare.outputs.matrix }}
+      length: ${{ steps.prepare.outputs.length }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,12 +53,14 @@ jobs:
 
           def main():
               item_lists = list(set(discover()))
+              length = len(item_lists)
               json_modules = jsonify({"service": item_lists})
 
-              github_output = f"matrix={json_modules}"
+              github_output = f"matrix={json_modules}\n"
 
               with open(os.environ["GITHUB_OUTPUT"], "a") as f:
                   f.write(github_output)
+                  f.write(f"length={length}\n")
 
           if __name__ == "__main__":
               main()
@@ -65,7 +68,7 @@ jobs:
   build:
     needs: prepare
     runs-on: ubuntu-latest
-    if: ${{ fromJson(needs.prepare.outputs.matrix).service != [] }}
+    if: ${{ needs.prepare.outputs.length > 0 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
