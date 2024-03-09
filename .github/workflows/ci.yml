@@ -41,6 +41,7 @@ jobs:
       - name: Install Rust ${{ env.RUST_VERSION }}
         run: |
           rustup toolchain install ${{ env.RUST_VERSION }} --target ${{ matrix.target }}
+          rustup target add ${{ matrix.target }}
       - name: Build
         run: |
           cargo build --release --target ${{ matrix.target }}
@@ -59,10 +60,3 @@ jobs:
             target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}-${{ matrix.target }}
             target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}-${{ matrix.target }}.sha256
           if-no-files-found: error
-      - if: github.event_name == 'release' && github.event.action == 'published'
-        name: Upload assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}-${{ matrix.target }}
-            target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}-${{ matrix.target }}.sha256
