@@ -21,11 +21,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Fetch changed files
-        uses: trilom/file-changes-action@v1
-        id: files-changed
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v42
+        with:
+          since_last_remote_commit: true
+          files: |
+            **/Dockerfile
       - name: Prepare
         id: prepare
         shell: python
@@ -36,9 +40,7 @@ jobs:
 
 
           def discover() -> list[str]:
-              for changed in ${{ steps.files-changed.outputs.files_modified }}:
-                  if ".github" in changed:
-                      continue
+              for changed in ${{ steps.changed-markdown-files.outputs.all_changed_files }}:
                   path = Path(changed)
                   if Path(path.parts[0]).is_dir():
                       yield path.parts[0]
