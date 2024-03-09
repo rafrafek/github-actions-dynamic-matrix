@@ -27,15 +27,14 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          echo 'matrix=${{ steps.files-changed.outputs.files_modified }}' >> $GITHUB_OUTPUT
+          echo 'matrix=${{ toJson({"directory": steps.files-changed.outputs.files_modified}) }}' >> $GITHUB_OUTPUT
 
   build:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Debug
         run: echo ${{ matrix }}
