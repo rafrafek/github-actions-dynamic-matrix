@@ -28,16 +28,16 @@ jobs:
         id: determine-base
         run: |
           if [[ ${{ github.event.action }} == "opened" ]]; then
-            echo "::set-output name=base_ref::main"
+            echo "BASE_SHA=main" >> $GITHUB_ENV
           else
-            echo "::set-output name=base_ref::${{ github.event.before }}"
+            echo "BASE_SHA=${{ github.event.before }}" >> $GITHUB_ENV
           fi
 
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          base-ref: ${{ steps.determine-base.outputs.base_ref }}
+          base_sha: ${{ env.BASE_SHA }}
           sha: ${{ github.sha }}
           files: |
             **/Dockerfile
