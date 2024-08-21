@@ -1,13 +1,12 @@
 name: ci
 
-concurrency:
-  group: ci-${{ github.ref_name }}-${{ github.event_name }}
-  cancel-in-progress: ${{ ! startsWith(github.ref, 'refs/tags/') }}
-
 on:
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
 
 permissions:
   contents: read
@@ -24,13 +23,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Determine comparison base
+        id: determine-base
+        run: |
+          if [[ ${{ github.event.action }} == "opened" ]]; then
+            echo "::set-output name=base_ref::main"
+          else
+            echo "::set-output name=base_ref::${{ github.event.before }}"
+          fi
+
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          since_last_remote_commit: true
+          base-ref: ${{ steps.determine-base.outputs.base_ref }}
+          sha: ${{ github.sha }}
           files: |
             **/Dockerfile
+
       - name: Prepare
         id: prepare
         shell: python
