@@ -29,7 +29,7 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           since_last_remote_commit: true
-          separator: "\n"
+          separator: "\\n"
           files: |
             **/*
 
@@ -45,25 +45,30 @@ jobs:
           import json
           import os
           from pathlib import Path
+          from typing import Any, Generator
 
 
-          def discover() -> list[str]:
+          def discover() -> Generator[str, Any, None]:
               for changed in "${{ steps.changed-files.outputs.all_changed_files }}".split("\n"):
+                  print(changed)
                   path = Path(changed)
                   if Path(path.parts[0]).is_dir():
                       yield path.parts[0]
 
 
-          def jsonify(item_lists: list[str]) -> str:
+          def jsonify(item_lists: dict[str,list[str]]) -> str:
               return json.dumps(item_lists, separators=(",", ":"))
 
 
-          def main():
+          def main() -> None:
               item_lists = list(set(discover()))
               length = len(item_lists)
               json_modules = jsonify({"service": item_lists})
 
               github_output = f"matrix={json_modules}\n"
+
+              print(github_output)
+              print(length)
 
               with open(os.environ["GITHUB_OUTPUT"], "a") as f:
                   f.write(github_output)
