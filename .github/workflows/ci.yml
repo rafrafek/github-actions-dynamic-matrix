@@ -31,7 +31,7 @@ jobs:
           since_last_remote_commit: true
           separator: "\\n"
           files: |
-            **/*
+            **/Dockerfile
 
       - name: Echo list of changed files on success
         run: |
@@ -49,8 +49,10 @@ jobs:
 
 
           def discover() -> Generator[str, Any, None]:
-              for changed in "${{ steps.changed-files.outputs.all_changed_files }}".split("\n"):
-                  print(changed)
+              all_changed_files = "${{ steps.changed-files.outputs.all_changed_files }}"
+              if not all_changed_files:
+                  return
+              for changed in all_changed_files.split("\n"):
                   path = Path(changed)
                   if Path(path.parts[0]).is_dir():
                       yield path.parts[0]
@@ -62,14 +64,10 @@ jobs:
 
           def main() -> None:
               item_lists = list(set(discover()))
-              print()
               length = len(item_lists)
               json_modules = jsonify({"service": item_lists})
 
               github_output = f"matrix={json_modules}\n"
-
-              print(github_output)
-              print(length)
 
               with open(os.environ["GITHUB_OUTPUT"], "a") as f:
                   f.write(github_output)
@@ -88,7 +86,7 @@ jobs:
   build:
     needs: prepare
     runs-on: ubuntu-latest
-    if: false  #${{ needs.prepare.outputs.length > 0 }}
+    if: ${{ needs.prepare.outputs.length > 0 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
