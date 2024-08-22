@@ -24,20 +24,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine comparison base
-        id: determine-base
-        run: |
-          if [[ ${{ github.event.action }} == "opened" ]]; then
-            echo "BASE_SHA=main" >> $GITHUB_ENV
-          else
-            echo "BASE_SHA=${{ github.event.before }}" >> $GITHUB_ENV
-          fi
-
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
-          base_sha: ${{ env.BASE_SHA }}
+          since_last_remote_commit: true
           files: |
             **/Dockerfile
 
