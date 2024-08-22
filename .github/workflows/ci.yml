@@ -29,8 +29,14 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           since_last_remote_commit: true
+          separator: "\\n"
           files: |
             **/Dockerfile
+
+      - name: Echo list of changed files on success
+        run: |
+          echo "Changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
 
       - name: Prepare
         id: prepare
@@ -39,20 +45,24 @@ jobs:
           import json
           import os
           from pathlib import Path
+          from typing import Any, Generator
 
 
-          def discover() -> list[str]:
-              for changed in ${{ steps.changed-markdown-files.outputs.all_changed_files || '[]' }}:
+          def discover() -> Generator[str, Any, None]:
+              all_changed_files = "${{ steps.changed-files.outputs.all_changed_files }}"
+              if not all_changed_files:
+                  return
+              for changed in all_changed_files.split("\n"):
                   path = Path(changed)
                   if Path(path.parts[0]).is_dir():
                       yield path.parts[0]
 
 
-          def jsonify(item_lists: list[str]) -> str:
+          def jsonify(item_lists: dict[str,list[str]]) -> str:
               return json.dumps(item_lists, separators=(",", ":"))
 
 
-          def main():
+          def main() -> None:
               item_lists = list(set(discover()))
               length = len(item_lists)
               json_modules = jsonify({"service": item_lists})
@@ -65,6 +75,13 @@ jobs:
 
           if __name__ == "__main__":
               main()
+
+      - name: Echo prepare step output
+        run: |
+          echo "Changed files length:"
+          echo "${{ steps.prepare.outputs.length }}"
+          echo "Changed files:"
+          echo '${{ steps.prepare.outputs.matrix }}'
 
   build:
     needs: prepare
