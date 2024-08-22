@@ -29,6 +29,7 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           since_last_remote_commit: true
+          separator: "\n"
           files: |
             **/*
 
@@ -36,8 +37,6 @@ jobs:
         run: |
           echo "Changed files:"
           echo "${{ steps.changed-files.outputs.all_changed_files }}"
-          echo "Changed files using toJSON:"
-          echo '${{ toJSON(steps.changed-files.outputs.all_changed_files) }}'
 
       - name: Prepare
         id: prepare
@@ -49,7 +48,7 @@ jobs:
 
 
           def discover() -> list[str]:
-              for changed in "${{ steps.changed-files.outputs.all_changed_files }}".split(" "):
+              for changed in "${{ steps.changed-files.outputs.all_changed_files }}".split("\n"):
                   path = Path(changed)
                   if Path(path.parts[0]).is_dir():
                       yield path.parts[0]
@@ -73,10 +72,17 @@ jobs:
           if __name__ == "__main__":
               main()
 
+      - name: Echo prepare step output
+        run: |
+          echo "Changed files length:"
+          echo "${{ steps.prepare.outputs.length }}"
+          echo "Changed files:"
+          echo "${{ steps.prepare.outputs.matrix }}"
+
   build:
     needs: prepare
     runs-on: ubuntu-latest
-    if: ${{ needs.prepare.outputs.length > 0 }}
+    if: false  #${{ needs.prepare.outputs.length > 0 }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
